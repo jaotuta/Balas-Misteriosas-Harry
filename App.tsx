@@ -1,9 +1,7 @@
-
-import React, { useState, useCallback, useRef } from 'react';
-import Wheel from './components/Wheel';
-import { CandyOption } from './types';
-import { CANDY_OPTIONS, SPIN_DURATION } from './constants';
-import { getMysteriousMessage } from './services/gemini';
+import React, { useState, useCallback, useRef } from "react";
+import Wheel from "./components/Wheel";
+import { CandyOption } from "./types";
+import { CANDY_OPTIONS, SPIN_DURATION } from "./constants";
 
 const App: React.FC = () => {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -12,7 +10,7 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [history, setHistory] = useState<CandyOption[]>([]);
   const [showModal, setShowModal] = useState(false);
-  
+
   const rotationRef = useRef(0);
 
   const handleSpin = useCallback(() => {
@@ -25,24 +23,13 @@ const App: React.FC = () => {
 
     // 1. Calcular o resultado IMEDIATAMENTE antes do giro começar
     const extraDegrees = Math.floor(Math.random() * 360);
-    const newRotation = rotationRef.current + 2880 + extraDegrees; 
-    
+    const newRotation = rotationRef.current + 2880 + extraDegrees;
+
     // Calcular qual segmento vai cair
     const normalizedRotation = (360 - (newRotation % 360)) % 360;
     const segmentAngle = 360 / CANDY_OPTIONS.length;
     const index = Math.floor(normalizedRotation / segmentAngle);
     const landed = CANDY_OPTIONS[index];
-
-    // 2. Iniciar a chamada da API do Oráculo em paralelo ao giro
-    const fetchMessage = async () => {
-      try {
-        const aiMsg = await getMysteriousMessage(landed.name);
-        setMessage(aiMsg);
-      } catch (e) {
-        setMessage("O destino sussurra em silêncio...");
-      }
-    };
-    fetchMessage();
 
     // 3. Iniciar animação
     rotationRef.current = newRotation;
@@ -52,7 +39,7 @@ const App: React.FC = () => {
     setTimeout(() => {
       setResult(landed);
       setIsSpinning(false);
-      setHistory(prev => [landed, ...prev.slice(0, 9)]);
+      setHistory((prev) => [landed, ...prev.slice(0, 9)]);
       setShowModal(true);
     }, SPIN_DURATION);
   }, [isSpinning]);
@@ -72,19 +59,21 @@ const App: React.FC = () => {
 
       {/* Main Area */}
       <main className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl py-4">
-        <Wheel 
-          rotation={rotation} 
-          onSpin={handleSpin} 
-          isSpinning={isSpinning} 
+        <Wheel
+          rotation={rotation}
+          onSpin={handleSpin}
+          isSpinning={isSpinning}
         />
-        
+
         {/* History on main layout (subtle) */}
         {!isSpinning && !showModal && (
           <div className="mt-12 w-full max-w-xs animate-in fade-in duration-700">
-            <h3 className="text-[10px] font-black text-[#f3e5ab]/30 uppercase tracking-[0.4em] mb-3 text-center">Invocados Recentemente</h3>
+            <h3 className="text-[10px] font-black text-[#f3e5ab]/30 uppercase tracking-[0.4em] mb-3 text-center">
+              Invocados Recentemente
+            </h3>
             <div className="flex justify-center flex-wrap gap-2">
               {history.map((h, i) => (
-                <div 
+                <div
                   key={`${h.id}-${i}`}
                   className="w-6 h-6 sm:w-8 sm:h-8 rounded-full border border-[#f3e5ab]/10"
                   style={{ backgroundColor: h.hex }}
@@ -100,42 +89,44 @@ const App: React.FC = () => {
       {showModal && result && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="parchment p-6 sm:p-10 rounded-sm shadow-[0_20px_60px_rgba(0,0,0,1)] border-l-8 border-[#433422] relative max-w-md w-full animate-in zoom-in duration-500 slide-in-from-bottom-8">
-            <button 
+            <button
               onClick={() => setShowModal(false)}
               className="absolute top-2 right-4 text-2xl text-[#433422] font-bold hover:scale-110 transition-transform"
             >
               ×
             </button>
-            
+
             <h2 className="text-[#433422] text-[10px] font-bold uppercase tracking-[0.3em] mb-6 border-b border-[#433422]/20 pb-2">
               O Oráculo Proclamou:
             </h2>
 
             <div className="space-y-6">
               <div className="flex items-center gap-6">
-                <div 
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.4)] border-2 border-[#433422]/30" 
-                  style={{ backgroundColor: result.hex }} 
+                <div
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-[inset_0_0_15px_rgba(0,0,0,0.4)] border-2 border-[#433422]/30"
+                  style={{ backgroundColor: result.hex }}
                 />
                 <div className="flex-1">
-                  <span className="text-[10px] text-slate-600 block uppercase font-bold tracking-tight">Cromatismo Destinado</span>
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold tracking-tight">
+                    Cromatismo Destinado
+                  </span>
                   <h3 className="text-xl sm:text-2xl font-black text-[#433422] leading-tight">
                     {result.name}
                   </h3>
                 </div>
               </div>
-              
+
               <div className="min-h-[80px] flex items-center">
                 <p className="text-[#433422] font-serif text-lg sm:text-xl leading-relaxed italic border-l-2 border-[#433422]/20 pl-4 py-2">
                   "{message || "Interpretando as runas do paladar..."}"
                 </p>
               </div>
-              
+
               <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-between items-center border-t border-[#433422]/10">
                 <span className="text-[9px] font-black uppercase text-[#433422]/40 tracking-widest text-center sm:text-left">
                   Prove agora ou cale-se para sempre
                 </span>
-                <button 
+                <button
                   onClick={() => setShowModal(false)}
                   className="w-full sm:w-auto px-6 py-2 bg-[#433422] text-[#f2e8c9] text-xs font-bold uppercase tracking-widest hover:bg-[#2D2418] transition-colors rounded-none"
                 >
