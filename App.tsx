@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import Wheel from "./components/Wheel";
 import { CandyOption } from "./types";
 import { CANDY_OPTIONS, SPIN_DURATION } from "./constants";
+import { getRandomMessage } from "./services/harryPotterMessages";
 
 const App: React.FC = () => {
   const [isSpinning, setIsSpinning] = useState(false);
@@ -39,6 +40,7 @@ const App: React.FC = () => {
     setTimeout(() => {
       setResult(landed);
       setIsSpinning(false);
+      setMessage(getRandomMessage());
       setHistory((prev) => [landed, ...prev.slice(0, 9)]);
       setShowModal(true);
     }, SPIN_DURATION);
@@ -118,7 +120,7 @@ const App: React.FC = () => {
 
               <div className="min-h-[80px] flex items-center">
                 <p className="text-[#433422] font-serif text-lg sm:text-xl leading-relaxed italic border-l-2 border-[#433422]/20 pl-4 py-2">
-                  "{message || "Interpretando as runas do paladar..."}"
+                  "{message}"
                 </p>
               </div>
 

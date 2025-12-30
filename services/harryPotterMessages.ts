@@ -1,0 +1,48 @@
+export const HARRY_POTTER_MESSAGES = [
+  "O Sabor-de-Amortentia revelou seus desejos mais profundos...",
+  "Dumbledore sussurra: 'Escolhas são tão importantes quanto habilidades'",
+  "A Varinha de Sabugueiro reconheceu a magia dentro de você.",
+  "Até mesmo o chocolate da Rana de Chocolate empalidece perto deste.",
+  "Snape arquearia uma sobrancelha diante dessa escolha...",
+  "Lumos! O sabor brilha com uma magia especial.",
+  "A Câmara dos Segredos guardou esse sabor por séculos.",
+  "Nagini teria aprovado esse aroma...",
+  "Quidditch nunca foi tão delicioso.",
+  "Hermione aprovaria essa seleção erudita.",
+  "Ron lameria os lábios com essa descoberta.",
+  "Harry veria neste sabor a esperança do futuro.",
+  "Draco Malfoy faria uma careta... ou gostaria em segredo.",
+  "A Poção Multijugo tomou forma neste confite.",
+  "Horcrux? Não, puro prazer mundano.",
+  "Fleur Delacour diria: 'C'est magnifique!'",
+  "Fred e George inventariam um acessório para este.",
+  "Luna Lovegood enxergaria nisto uma Nargagouela dourada.",
+  "Neville finalmente acertou a fórmula mágica.",
+  "Ginny jogaria com paixão em torno deste sabor.",
+  "Lavender Brown passaria a chamar isto de 'Won-Won da boca'.",
+  "A Maçã da Árvore da Verdade nunca foi tão real.",
+  "Hagrid diria: 'É tão bonito quanto a Aranha Acromântula'.",
+  "Dobby teceria uma história mágica sobre este doce.",
+  "A Moeda de Bilhar de Sirius Black teria predito isto.",
+  "Fawkes estaria cantando de pura alegria.",
+  "O Chapéu Seletor gritaria: 'Definitivamente Lufa-Lufa!'",
+  "A Ponte de Hogwarts levaria a este momento perfeito.",
+  "O Espelho de Ojesed mostraria você desfrutando disto eternamente.",
+  "Grindelwald teria invejado este puro deleite.",
+  "O Patrono toma forma... é feito deste sabor!",
+  "Piton Petunia teria encontrado consolo nisto.",
+  "A Marca Negra latejaria de inveja.",
+  "Lupin teria um sorriso genuíno comendo isto.",
+  "Sirius Black fugiria de Azkaban por esse sabor.",
+  "James Potter e Lírio se encontrariam aqui.",
+  "O Feitiço Imperius obrigaria qualquer um a querer mais.",
+  "A Profecia foi feita para este exato momento.",
+  "Mágicos e trouxas concordariam: isto é extraordinário.",
+  "Expecto Patronum! Este é seu verdadeiro patrono doce.",
+];
+
+export function getRandomMessage(): string {
+  return HARRY_POTTER_MESSAGES[
+    Math.floor(Math.random() * HARRY_POTTER_MESSAGES.length)
+  ];
+}
