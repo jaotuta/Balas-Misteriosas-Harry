@@ -1,21 +1,50 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Wheel from "./components/Wheel";
+import ColorManager from "./components/ColorManager";
 import { CandyOption } from "./types";
-import { CANDY_OPTIONS, SPIN_DURATION } from "./constants";
+import {
+  DEFAULT_CANDY_OPTIONS,
+  CANDY_OPTIONS_KEY,
+  SPIN_DURATION,
+} from "./constants";
 import { getRandomMessage } from "./services/harryPotterMessages";
 
 const App: React.FC = () => {
+  const [candyOptions, setCandyOptions] = useState<CandyOption[]>([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<CandyOption | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [history, setHistory] = useState<CandyOption[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [showColorManager, setShowColorManager] = useState(false);
 
   const rotationRef = useRef(0);
 
+  // Carregar cores do localStorage ou usar padrão
+  useEffect(() => {
+    const saved = localStorage.getItem(CANDY_OPTIONS_KEY);
+    if (saved) {
+      try {
+        setCandyOptions(JSON.parse(saved));
+      } catch {
+        setCandyOptions(DEFAULT_CANDY_OPTIONS);
+      }
+    } else {
+      setCandyOptions(DEFAULT_CANDY_OPTIONS);
+    }
+  }, []);
+
+  const handleSaveCandyOptions = (newOptions: CandyOption[]) => {
+    setCandyOptions(newOptions);
+    localStorage.setItem(CANDY_OPTIONS_KEY, JSON.stringify(newOptions));
+    setShowColorManager(false);
+  };
+
   const handleSpin = useCallback(() => {
-    if (isSpinning) return;
+    // Filtrar apenas cores com quantidade > 0
+    const availableCandies = candyOptions.filter((c) => c.quantity > 0);
+    if (isSpinning || availableCandies.length === 0) return;
 
     setIsSpinning(true);
     setResult(null);
@@ -28,9 +57,9 @@ const App: React.FC = () => {
 
     // Calcular qual segmento vai cair
     const normalizedRotation = (360 - (newRotation % 360)) % 360;
-    const segmentAngle = 360 / CANDY_OPTIONS.length;
+    const segmentAngle = 360 / availableCandies.length;
     const index = Math.floor(normalizedRotation / segmentAngle);
-    const landed = CANDY_OPTIONS[index];
+    const landed = availableCandies[index];
 
     // 3. Iniciar animação
     rotationRef.current = newRotation;
@@ -43,8 +72,54 @@ const App: React.FC = () => {
       setMessage(getRandomMessage());
       setHistory((prev) => [landed, ...prev.slice(0, 9)]);
       setShowModal(true);
+
+      // Decrementar quantidade (não remover)
+      setCandyOptions((prevOptions) => {
+        const updated = prevOptions.map((candy) => {
+          if (candy.id === landed.id) {
+            return { ...candy, quantity: Math.max(0, candy.quantity - 1) };
+          }
+          return candy;
+        });
+
+        // Salvar no localStorage (mantendo cores com quantidade 0)
+        localStorage.setItem(CANDY_OPTIONS_KEY, JSON.stringify(updated));
+
+        return updated;
+      });
     }, SPIN_DURATION);
-  }, [isSpinning]);
+  }, [isSpinning, candyOptions.length]);
+
+  // Verificar se há cores com quantidade disponível
+  const availableCandiesForDisplay = candyOptions.filter((c) => c.quantity > 0);
+
+  if (availableCandiesForDisplay.length === 0) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:p-12 bg-[#1a130c]">
+        <div className="text-center space-y-6 max-w-2xl">
+          <h1 className="text-4xl sm:text-7xl font-black tracking-tighter text-[#f3e5ab] magical-glow leading-tight">
+            TESTE SUA MAGIA
+          </h1>
+          <p className="text-[#f3e5ab]/70 text-base sm:text-lg">
+            Configure as cores da roleta para começar
+          </p>
+          <button
+            onClick={() => setShowColorManager(true)}
+            className="px-8 py-3 bg-[#689F38] text-white font-bold rounded-lg hover:bg-[#558B2F] transition-colors text-lg uppercase tracking-wide"
+          >
+            Configurar Cores
+          </button>
+        </div>
+        {showColorManager && (
+          <ColorManager
+            candies={candyOptions}
+            onSave={handleSaveCandyOptions}
+            onClose={() => setShowColorManager(false)}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-between py-8 px-4 sm:p-12 overflow-x-hidden">
@@ -65,7 +140,17 @@ const App: React.FC = () => {
           rotation={rotation}
           onSpin={handleSpin}
           isSpinning={isSpinning}
+          candyOptions={availableCandiesForDisplay}
         />
+
+        {/* Settings Button */}
+        <button
+          onClick={() => setShowColorManager(true)}
+          className="mt-8 px-4 py-2 bg-[#433422] text-[#f3e5ab] rounded-lg hover:bg-[#2D2418] transition-colors text-sm font-bold uppercase tracking-widest"
+        >
+          ⚙ Gerenciar Cores ({availableCandiesForDisplay.length}/
+          {candyOptions.length})
+        </button>
 
         {/* History on main layout (subtle) */}
         {!isSpinning && !showModal && (
@@ -140,10 +225,22 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Color Manager Modal */}
+      {showColorManager && (
+        <ColorManager
+          candies={candyOptions}
+          onSave={handleSaveCandyOptions}
+          onClose={() => setShowColorManager(false)}
+        />
+      )}
+
       {/* Footer */}
       <footer className="w-full py-4 text-[#f3e5ab]/20 text-[8px] sm:text-[10px] uppercase tracking-[0.5em] flex flex-col items-center gap-2">
         <div className="w-32 sm:w-64 h-px bg-gradient-to-r from-transparent via-[#f3e5ab]/10 to-transparent mb-2"></div>
         <p>Mistérios do Sabor • Alquimia Digital</p>
+        <p className="text-[7px] sm:text-[9px] font-semibold tracking-wider">
+          Desenvolvido por João Lucas Cruz
+        </p>
       </footer>
     </div>
   );
